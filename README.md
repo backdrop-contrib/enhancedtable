@@ -1,6 +1,6 @@
 # Views Enhanced Table
 
-**Views Enhanced Table** provides an enhanced **Table** style plugin for Backdrop Views.
+ **Views Enhanced Table** provides an enhanced **Table** style plugin for Backdrop Views.
 
 It keeps the core table output and options, but adds a more convenient configuration UI and several additional display controls.
 
