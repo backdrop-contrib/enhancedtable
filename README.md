@@ -27,9 +27,11 @@ All of the stock Table styling options are available (some in a more intuitive U
 - Views (core module)
 
 ## Installation
-
-1. Place the module directory in `modules/enhancedtable` (or `modules/custom/enhancedtable`).
-2. Enable **Views Enhanced Table** at `admin/modules`.
+The easiest way to install the module on an existing Backdrop CMS site is to navigate to `admin/modules/install` and search for "views enhanced table". Otherwise,
+- Install this module using the official Backdrop CMS instructions at
+  https://docs.backdropcms.org/documentation/extend-with-modules.
+- Enable the module at:  
+   **Administration → Functionality → List modules**
 
 ## Usage
 
