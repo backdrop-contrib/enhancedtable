@@ -1,0 +1,249 @@
+<?php
+
+/**
+ * @file
+ * Enhanced Table module bootstrap.
+ */
+
+/**
+ * Implements hook_views_api().
+ */
+function enhancedtable_views_api() {
+  return array(
+    'api' => '3.0',
+    'path' => backdrop_get_path('module', 'enhancedtable') . '/views',
+  );
+}
+
+/**
+ * Implements hook_autoload_info().
+ *
+ * Ensure the Views style plugin class file is loaded when needed.
+ */
+function enhancedtable_autoload_info() {
+  return array(
+    'enhancedtable_plugin_style_table' => 'views/enhancedtable_plugin_style_table.inc',
+  );
+}
+
+/**
+ * Implements hook_library_info().
+ *
+ * Currently unused by the style options form, but kept for future styling.
+ */
+function enhancedtable_library_info() {
+  $path = backdrop_get_path('module', 'enhancedtable');
+  return array(
+    'enhancedtable.admin' => array(
+      'title' => 'EnhancedTable admin helpers',
+      'version' => '1.x',
+      'js' => array(
+        $path . '/js/enhancedtable.admin.js' => array(),
+      ),
+      'css' => array(
+        $path . '/css/enhancedtable.admin.css' => array(
+          'type'  => 'file',
+          'group' => CSS_THEME,
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_theme().
+ *
+ * Provide a custom theme function for the table-style options form in Views.
+ */
+function enhancedtable_theme($existing, $type, $theme, $path) {
+  return array(
+    'enhancedtable_flipped_options_table' => array(
+      'render element' => 'form',
+      'file' => 'views/enhancedtable.admin.inc',
+    ),
+    // Custom Views UI theme for the table style plugin options form.
+    // EnhancedTable replaces the stock table-matrix UI with a cards-based UI.
+    'enhancedtable_views_ui_style_plugin_table' => array(
+      'render element' => 'form',
+      'file' => 'views/enhancedtable.admin.inc',
+    ),
+  );
+}
+
+/**
+ * Preprocess for views_view_table: EnhancedTable extras (widths, borders).
+ */
+function enhancedtable_preprocess_views_view_table(&$variables) {
+  $view = $variables['view'];
+
+  // Only act on views using our EnhancedTable style plugin.
+  $plugin_name = !empty($view->style_plugin->plugin_name)
+    ? $view->style_plugin->plugin_name
+    : '';
+    // We're looking for 'enhancedtable' as defined in file:enhancedtable.views.inc
+  if ($plugin_name !== 'enhancedtable') {
+//watchdog('BT79', 'Style plugin: @name', array('@name' => $view->style_plugin->plugin_name), WATCHDOG_DEBUG);
+
+    return;
+  }
+//watchdog('BT83', 'Style plugin: @name', array('@name' => $view->style_plugin->plugin_name), WATCHDOG_DEBUG);
+
+  $options = $view->style_plugin->options;
+
+  // Build a selector specific to this view + display.
+  // Use the raw machine names; Views uses these directly as classes:
+  //   .view-id-<view_name>
+  //   .view-display-id-<display_id>
+  $view_selector = '.view-id-' . $view->name
+    . '.view-display-id-' . $view->current_display;
+//('BT90', 'view_selector: @sel', array('@sel' => $view_selector), WATCHDOG_DEBUG);
+
+  $css = '';
+
+  // -------------------------------------------------------------------
+  // Column widths: style_options[column_widths][FIELD] => CSS width.
+  // -------------------------------------------------------------------
+  if (!empty($options['column_widths']) && is_array($options['column_widths'])) {
+    foreach ($options['column_widths'] as $field => $width) {
+      $width = trim($width);
+      if ($width === '') {
+        continue;
+      }
+
+      // Conservative whitelist for width values:
+      //   12, 12px, 10em, 8rem, 25%, 15ch, 10ex
+      if (!preg_match('/^\d+(\.\d+)?(px|em|rem|%|ch|ex)?$/', $width)) {
+        // Ignore anything outside this pattern.
+        continue;
+      }
+
+      // Views table cells are "views-field-FIELDNAME".
+      $field_class = backdrop_clean_css_identifier($field);
+
+      $selector = $view_selector
+        . ' table.views-table th.views-field-' . $field_class . ', '
+        . $view_selector
+        . ' table.views-table td.views-field-' . $field_class;
+
+      $css .= $selector . " { width: {$width}; }\n";
+    }
+  }
+
+  // -------------------------------------------------------------------
+  // Column alignment.
+  // Views normally applies views-align-* classes, but some themes override
+  // these or the class may not land where expected when columns are merged.
+  // Apply a conservative, explicit alignment to the cell.
+  // -------------------------------------------------------------------
+  if (!empty($options['info']) && is_array($options['info'])) {
+    foreach ($options['info'] as $field => $info) {
+      if (empty($info['align'])) {
+        continue;
+      }
+
+      $align_class = (string) $info['align'];
+      $text_align = '';
+      if (strpos($align_class, 'left') !== FALSE) {
+        $text_align = 'left';
+      }
+      elseif (strpos($align_class, 'center') !== FALSE) {
+        $text_align = 'center';
+      }
+      elseif (strpos($align_class, 'right') !== FALSE) {
+        $text_align = 'right';
+      }
+
+      if ($text_align === '') {
+        continue;
+      }
+
+      $field_class = backdrop_clean_css_identifier($field);
+      $selector = $view_selector
+        . ' table.views-table th.views-field-' . $field_class . ', '
+        . $view_selector
+        . ' table.views-table td.views-field-' . $field_class;
+
+      $css .= $selector . " { text-align: {$text_align}; }\n";
+    }
+  }
+
+  // -------------------------------------------------------------------
+  // Horizontal row borders.
+  // -------------------------------------------------------------------
+  if (!empty($options['row_borders'])) {
+    // Thickness and color with simple validation/fallback.
+    $thk = !empty($options['row_border_thickness'])
+      ? trim($options['row_border_thickness'])
+      : '1px';
+    // Allow plain number to be treated as px.
+    if (preg_match('/^\d+(\.\d+)?$/', $thk)) {
+      $thk .= 'px';
+    }
+    // Accept standard CSS length units.
+    if (!preg_match('/^\d+(\.\d+)?(px|em|rem|%|ch|ex)?$/', $thk)) {
+      $thk = '1px';
+    }
+
+    $color = !empty($options['row_border_color'])
+      ? trim($options['row_border_color'])
+      : '#cccccc';
+
+    $border = $thk . ' solid ' . $color;
+
+    $css .= $view_selector
+      . " table.views-table tbody tr + tr td { border-top: {$border}; }\n";
+  }
+
+  // -------------------------------------------------------------------
+  // Vertical column borders.
+  // -------------------------------------------------------------------
+  if (!empty($options['column_borders'])) {
+    $thk = !empty($options['column_border_thickness'])
+      ? trim($options['column_border_thickness'])
+      : '1px';
+    if (preg_match('/^\d+(\.\d+)?$/', $thk)) {
+      $thk .= 'px';
+    }
+    if (!preg_match('/^\d+(\.\d+)?(px|em|rem|%|ch|ex)?$/', $thk)) {
+      $thk = '1px';
+    }
+
+    $color = !empty($options['column_border_color'])
+      ? trim($options['column_border_color'])
+      : '#cccccc';
+
+    $border = $thk . ' solid ' . $color;
+
+    $css .= $view_selector
+      . " table.views-table thead th + th, "
+      . $view_selector
+      . " table.views-table tbody td + td { border-left: {$border}; }\n";
+  }
+
+  // -------------------------------------------------------------------
+  // Outer table frame border.
+  // -------------------------------------------------------------------
+  if (!empty($options['frame_border'])) {
+    $thk = !empty($options['frame_border_thickness'])
+      ? trim($options['frame_border_thickness'])
+      : '1px';
+    if (preg_match('/^\d+(\.\d+)?$/', $thk)) {
+      $thk .= 'px';
+    }
+    if (!preg_match('/^\d+(\.\d+)?(px|em|rem|%|ch|ex)?$/', $thk)) {
+      $thk = '1px';
+    }
+
+    $color = !empty($options['frame_border_color'])
+      ? trim($options['frame_border_color'])
+      : '#cccccc';
+
+    $border = $thk . ' solid ' . $color;
+
+    $css .= $view_selector
+      . " table.views-table { border: {$border}; border-collapse: collapse; }\n";
+  }
+  if ($css !== '') {
+    backdrop_add_css($css, array('type' => 'inline'));
+  }
+}

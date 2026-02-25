@@ -1,0 +1,373 @@
+
+
+/* ===== EnhancedTable cards UI ===== */
+
+/* Scope to the Views UI modal. */
+#backdrop-modal .bt-cards .form-item {
+    margin: 0;
+}
+#backdrop-modal  .bt-cards-wrap {
+  display: flex;
+  justify-content: center;
+}
+
+/* Reset field order control (above the cards). */
+#backdrop-modal .bt-reset-order {
+  display: block;
+  text-align: center;
+  margin: 0.25rem 0 0.5rem;
+}
+
+#backdrop-modal .bt-reset-order .bt-reset-field-order {
+  cursor: pointer;
+}
+
+#backdrop-modal .bt-reset-order .description {
+  margin-top: 0.25rem;
+}
+
+#backdrop-modal .bt-cards {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 1;
+}
+
+#backdrop-modal .bt-card {
+  background: #f9f9f9;
+  border: 1px solid #cfcfcf;
+  border-radius: 6px;
+  margin-top: 15px;
+  max-width: 118px;
+  min-width: 118px;
+  flex: none;
+  box-sizing: border-box;
+}
+
+#backdrop-modal .bt-card-header {
+  display: block;
+  padding-top: 4px;
+  padding-bottom: 0.3rem;
+  min-height: 4rem;
+  line-height: 1.1;
+  max-width: 118px;
+  background: #e0efe0;
+}
+#backdrop-modal .bt-card-nav {
+  height: 22px;
+  text-align: center;
+}
+
+/* Left/right arrow buttons in the card header. */
+#backdrop-modal .bt-card-header .bt-move-left,
+#backdrop-modal .bt-card-header .bt-move-right {
+  cursor: pointer;
+  user-select: none;
+  display: inline-block;
+  border: 1px solid #b5b5b5;
+  border-radius: 4px;
+  background: #e9e9e9;
+  line-height: 1;
+}
+#backdrop-modal .bt-card-header .bt-move-left {
+  margin: 0 0 0 1em;
+}
+#backdrop-modal .bt-card-header .bt-move-right {
+  margin: 0 1em 0 0;
+}    
+
+#backdrop-modal .bt-card-header .bt-move-left:disabled,
+#backdrop-modal .bt-card-header .bt-move-right:disabled {
+  opacity: 0.01;
+  cursor: default;
+}
+
+#backdrop-modal .bt-nav-icon {
+  width: 1rem;  /* Set the size */
+  height: 1rem;
+  vertical-align: middle;
+  color: inherit;  /* Matches the button text color */
+}
+
+#backdrop-modal .bt-card-title { 
+    display:block;
+    padding-top:5px;
+    width:100%; 
+    text-align:center; 
+  font-weight: bold;
+}
+
+/* Force-hide separator controls on cards where separators are not allowed.
+   Use !important so it remains hidden even if Backdrop/states.js toggles it. */
+#backdrop-modal .bt-sep-hidden {
+  display: none !important;
+}
+
+/* Visual cue when a card is moved (header flash + card pulse). */
+@keyframes bt-card-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
+  20% { box-shadow: 0 0 0 3px rgba(230, 180, 0, 0.85); }
+  100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
+}
+
+@keyframes bt-card-header-flash {
+  0% { background: #e0efe0; }
+  20% { background: #ffe7a1; }
+  100% { background: #e0efe0; }
+}
+
+#backdrop-modal .bt-card.bt-moved {
+  animation: bt-card-pulse 800ms ease-out 1;
+}
+
+#backdrop-modal .bt-card.bt-moved .bt-card-header {
+  animation: bt-card-header-flash 800ms ease-out 1;
+}
+
+/* Direction hint: a small inset bar on the side where the move occurred. */
+#backdrop-modal .bt-card.bt-moved-left .bt-card-header {
+  box-shadow: inset 4px 0 0 rgba(230, 180, 0, 0.9);
+}
+
+#backdrop-modal .bt-card.bt-moved-right .bt-card-header {
+  box-shadow: inset -4px 0 0 rgba(230, 180, 0, 0.9);
+}
+
+/* Subtle feedback for reset (container glow). */
+@keyframes bt-reset-glow {
+  0% { box-shadow: 0 0 0 0 rgba(230, 180, 0, 0); }
+  15% { box-shadow: 0 0 0 4px rgba(230, 180, 0, 0.55); }
+  100% { box-shadow: 0 0 0 0 rgba(230, 180, 0, 0); }
+}
+
+#backdrop-modal .bt-cards.bt-reset-flash {
+  animation: bt-reset-glow 800ms ease-out 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #backdrop-modal .bt-card.bt-moved,
+  #backdrop-modal .bt-card.bt-moved .bt-card-header {
+    animation: none !important;
+  }
+}
+
+#backdrop-modal .bt-card > .bt-sorting,
+#backdrop-modal .bt-card > .form-item,
+#backdrop-modal .bt-card > .input-form-text{
+  text-align: center;
+  max-width: 130px;
+  border-top: 1px solid;
+  padding: 5px 5px;
+}
+#backdrop-modal .bt-card > .bt-sorting select,
+#backdrop-modal .bt-card > .form-type-textfield {
+    max-width: 104px;
+    font-size: 80%;
+}
+
+#backdrop-modal .bt-no-default-sort {
+  margin-bottom: 0.75em;
+}
+#backdrop-modal .bt-card-title,
+#backdrop-modal .bt-card label{
+    font-size: 80%;
+}
+/* ===== EnhancedTable flipped settings matrix ===== */
+
+/* Target only our matrix inside the Views UI dialog. */
+#backdrop-modal table.bt-matrix.sticky-table,
+#backdrop-modal table.bt-matrix {
+  border-collapse: collapse;
+  border-bottom: none !important;
+}
+
+/* Turn off the stock striping for all but the first column. */
+#backdrop-modal table.bt-matrix.sticky-table th,
+#backdrop-modal table.bt-matrix.sticky-table td,
+#backdrop-modal table.bt-matrix.sticky-table tr.odd,
+#backdrop-modal table.bt-matrix.sticky-table tr.even {
+/*  background-color: #d2e7d7;*/
+  text-align: center;
+  border-top: none !important;
+  border-bottom: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  background-color:#f9f9f9;
+}
+
+/* Make the first column look like the “row header”. */
+#backdrop-modal table.bt-matrix th:first-child,
+#backdrop-modal table.bt-matrix td:first-child {
+  background-color: #d7d7c7 !important;
+  font-weight: bold;
+  white-space: nowrap;
+  vertical-align: middle;
+  text-align: center;
+}
+
+/* Keep the header row simple and non-striped too. */
+#backdrop-modal table.bt-matrix thead th {
+  background-color: #d7d7c7 !important;
+  text-align: center;
+}
+
+/* “No default ○” on one line. */
+#backdrop-modal table.bt-matrix .bt-no-default {
+  margin-top: 0.25em;
+  white-space: nowrap;
+}
+
+#backdrop-modal table.bt-matrix .bt-no-default .form-item {
+  display: inline-block;
+  margin-left: 0.25em;
+}
+
+/* ===== EnhancedTable flipped settings matrix: fixed column widths ===== */
+
+/* Use fixed-layout so explicit widths are respected and long content wraps
+   instead of expanding the whole table. */
+#backdrop-modal table.bt-matrix {
+  table-layout: fixed;
+}
+
+/* Let header text (field labels) wrap. */
+#backdrop-modal table.bt-matrix thead th {
+  white-space: normal;
+  vertical-align: middle;
+}
+
+/* First column ("Setting") – keep it a bit wider and highlighted. */
+#backdrop-modal table.bt-matrix th:first-child,
+#backdrop-modal table.bt-matrix td:first-child {
+  /* You probably already have background/font styles here; just add width. */
+  width: 6rem; /* tweak to taste */
+}
+
+/* All field columns – uniform, narrower width, wrap as needed. */
+#backdrop-modal table.bt-matrix th:not(:first-child),
+#backdrop-modal table.bt-matrix td:not(:first-child) {
+  width: 5rem;      /* tweak to taste */
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+}
+
+/* Keep the column SELECT controls from dictating column width. */
+#backdrop-modal table.bt-matrix td select.form-select {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+/* 'Separator' and 'Width' controls. * /
+#backdrop-modal table.bt-matrix td select.form-text {
+  max-width: 80%;
+  box-sizing: border-box;
+}
+*/
+
+/* ===== EnhancedTable flipped matrix live preview for styling options ===== */
+
+/* Base: no striping (we already turned off the default Views striping). 
+#backdrop-modal table.bt-matrix tbody tr td {
+  /* base background stays whatever you already use, typically transparent 
+}
+*/
+/* When "Add striping..." is checked, show simple odd/even striping. */
+#backdrop-modal table.bt-matrix.bt-striping tbody tr:nth-child(odd) td {
+  background-color: #dadada;
+}
+#backdrop-modal table.bt-matrix.bt-striping tbody tr:nth-child(even) td {
+  background-color: #f9f9f9;
+}
+
+/* When "Add horizontal row borders" is checked. */
+#backdrop-modal table.bt-matrix.bt-row-borders tbody tr + tr td {
+  border-top: 1px solid #ccc !important;
+}
+
+/* When "Add vertical column borders" is checked. */
+#backdrop-modal table.bt-matrix.bt-column-borders thead th + th,
+#backdrop-modal table.bt-matrix.bt-column-borders tbody td + td {
+  border-left: 1px solid #ccc !important;
+}
+
+/* When "Add a table frame border" is checked. */
+#backdrop-modal table.bt-matrix.bt-frame-border {
+  border: 1px solid #ccc !important;
+  border-collapse: collapse;
+}
+
+/* Inline layout for EnhancedTable border rows in the Styling fieldset. */
+#backdrop-modal .bt-border-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75em;
+  margin-bottom: 0.5em;
+}
+
+#backdrop-modal .bt-border-row .form-item {
+  margin: 0;
+}
+
+/* Keep Thickness/Color labels small and inline. */
+#backdrop-modal .bt-border-row .form-item label {
+  display: inline-block;
+  margin-right: 0.25em;
+}
+
+/* Color inputs can be slightly wider. */
+#backdrop-modal .bt-border-row input.bt-color-input {
+  width: 4.5em;
+  padding: 0;
+}
+
+/* Hide the core "Place fields into columns..." description that follows our
+   flipped matrix, even if other elements sit between them. */
+#backdrop-modal table.bt-matrix ~ .description.form-item {
+  display: none;
+}
+
+/* Make the Views UI "Settings" dialog taller and let its content scroll. */
+.views-ui-dialog {
+  /*height: 80vh !important;      /* Taller overall dialog window */
+  max-height: 95vh !important;
+  top: 5vh !important;         /* Bring it down a bit from the very top */
+
+  /*width: 80vw !important; */
+  max-width: 95vw !important;
+  left: 2vw !important;
+
+  box-sizing: border-box;
+  overflow-x: hidden !important; /* prevent the dialog itself from widening the page */
+}
+
+/* Ensure tables in the dialog never exceed the dialog width. */
+.views-ui-dialog table.sticky-header,
+.views-ui-dialog table.bt-matrix,
+.views-ui-dialog #edit-options > table {
+  max-width: 100% !important;
+  width: 100% !important;
+}
+
+/* Let the dialog content use most of the dialog's height. */
+.views-ui-dialog > .ui-dialog-content#backdrop-modal {
+  max-height: calc(80vh - 80px) !important; /* leave room for title + buttons */
+  height: auto !important;
+  overflow: visible; /* the inner scroll container will handle scrolling */
+}
+
+/* Main scrolling region inside the Style options dialog. */
+.views-ui-dialog #edit-options.scroll {
+  max-height: calc(80vh - 160px) !important; /* tweak if needed */
+  overflow-y: auto !important;
+}
+
+/* Constrain wrappers only inside the Views UI style-options dialog. */
+.views-ui-dialog .views-ui-edit-display-form .form-wrapper:not(.bt-card) {
+  max-width: 99% !important;
+}
+
+.btz-brdr {
+  width: 22em;
+}
