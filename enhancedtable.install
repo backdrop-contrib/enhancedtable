@@ -1,0 +1,150 @@
+<?php
+/**
+ * @file
+ * Install/enable/disable hooks for Enhanced Table.
+ */
+
+/**
+ * Implements hook_disable().
+ *
+ * When Enhanced Table is disabled, switch any displays using the enhancedtable
+ * style plugin back to core's table style so the View keeps rendering.
+ */
+function enhancedtable_disable() {
+  if (!module_exists('views')) {
+    return;
+  }
+
+  $switched = array();
+
+  // Load all Views that exist in active storage (not pure in-code defaults).
+  $views = views_get_all_views();
+
+  foreach ($views as $view) {
+    // Avoid creating overrides for untouched in-code defaults.
+    if (isset($view->type) && $view->type === 'default') {
+      continue;
+    }
+
+    if (empty($view->display) || !is_array($view->display)) {
+      continue;
+    }
+
+    $view_changed = FALSE;
+
+    foreach ($view->display as $display_id => &$display) {
+      // Support both object and array display storage.
+      if (is_object($display) && isset($display->display_options['style_plugin'])) {
+        $style_plugin = $display->display_options['style_plugin'];
+      }
+      elseif (is_array($display) && isset($display['display_options']['style_plugin'])) {
+        $style_plugin = $display['display_options']['style_plugin'];
+      }
+      else {
+        continue;
+      }
+
+      if ($style_plugin === 'enhancedtable') {
+        // Remember what we changed.
+        $switched[$view->name][] = $display_id;
+
+        // Switch to core table style.
+        if (is_object($display)) {
+          $display->display_options['style_plugin'] = 'table';
+        }
+        else {
+          $display['display_options']['style_plugin'] = 'table';
+        }
+
+        $view_changed = TRUE;
+      }
+    }
+
+    if ($view_changed) {
+      $view->save();
+    }
+  }
+
+  // Persist the list so we can restore on re-enable.
+  state_set('enhancedtable.disabled_switched_displays', $switched);
+
+  if (function_exists('views_invalidate_cache')) {
+    views_invalidate_cache();
+  }
+}
+
+/**
+ * Implements hook_enable().
+ *
+ * Best-effort restore: set displays we previously switched back to enhancedtable,
+ * but only if they are still using core 'table'.
+ */
+function enhancedtable_enable() {
+  if (!module_exists('views')) {
+    return;
+  }
+
+  $switched = state_get('enhancedtable.disabled_switched_displays', array());
+  if (empty($switched) || !is_array($switched)) {
+    return;
+  }
+
+  foreach ($switched as $view_name => $display_ids) {
+    $view = views_get_view($view_name);
+    if (!$view || empty($view->display) || !is_array($view->display)) {
+      continue;
+    }
+
+    $view_changed = FALSE;
+
+    foreach ((array) $display_ids as $display_id) {
+      if (!isset($view->display[$display_id])) {
+        continue;
+      }
+
+      $display = &$view->display[$display_id];
+
+      if (is_object($display) && isset($display->display_options['style_plugin'])) {
+        $style_plugin = $display->display_options['style_plugin'];
+        if ($style_plugin === 'table') {
+          $display->display_options['style_plugin'] = 'enhancedtable';
+          $view_changed = TRUE;
+        }
+      }
+      elseif (is_array($display) && isset($display['display_options']['style_plugin'])) {
+        $style_plugin = $display['display_options']['style_plugin'];
+        if ($style_plugin === 'table') {
+          $display['display_options']['style_plugin'] = 'enhancedtable';
+          $view_changed = TRUE;
+        }
+      }
+    }
+
+    if ($view_changed) {
+      $view->save();
+    }
+  }
+
+  // One-shot restore; clear the record after attempting.
+  state_del('enhancedtable.disabled_switched_displays');
+
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function enhancedtable_uninstall() {
+  // Remove the disable/enable bookkeeping.
+  state_del('enhancedtable.disabled_switched_displays');
+
+  // Remove any config files owned by this project (if any).
+  // Backdrop provides config_uninstall_config() (since 1.26.0), and config()->delete()
+  // works across versions for single files.
+  if (function_exists('config_uninstall_config')) {
+    config_uninstall_config('enhancedtable');
+  }
+  else {
+    // If you ever add a settings config file, delete it explicitly here.
+    config('enhancedtable.settings')->delete();
+  }
+}

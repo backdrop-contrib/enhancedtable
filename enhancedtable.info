@@ -4,5 +4,4 @@ type = module
 backdrop = 1.x
 package = Views
 dependencies[] = views
-stylesheets[all][] = css/enhancedtable.admin.css
-scripts[] = js/enhancedtable.admin.js
+
