@@ -17,10 +17,6 @@ All of the stock Table styling options are available (some in a more intuitive U
   - **Vertical column borders**
   - **Outer table frame**
 
-### Organization
-- Style options are grouped into fieldsets:
-  - **Columns**, **Styling**, **Mechanics**, **Admin**, plus **Help**.
-
 ## Requirements
 
 - Backdrop CMS 1.x
