@@ -31,13 +31,13 @@ The easiest way to install the module on an existing Backdrop CMS site is to nav
 
 ## Usage
 
-1. Edit a View.
-2. In the display’s **Format** section, choose:
+ 1. Edit a View.
+ 2. In the display’s **Format** section, choose:
    - **Show:** Table
    - **Style plugin:** **Table (Enhanced)**
-3. Click **Settings** next to the style plugin.
-4. Use the **Columns** fieldset to reorder, merge, set separators, alignment, widths, and click-sorting.
-5. Use **Styling** for borders/striping and row-class options.
+ 3. Click **Settings** next to the style plugin.
+ 4. Use the **Columns** fieldset to reorder, merge, set separators, alignment, widths, and click-sorting.
+ 5. Use **Styling** for borders/striping and row-class options.
 
 ## Configuration storage
 
@@ -47,7 +47,6 @@ All settings are stored per View display, inside the View’s configuration (`di
 
 ## Disabling / uninstalling
 
-NOTE: The following functionality isn't working quite yet... _(we're working on it)_
 Enhanced Table includes a safety mechanism: when the module is **disabled**, it automatically switches any displays using the Enhanced Table style back to the core **Table** style so the View continues to render (albit, with some styling no longer working), and it will create a module-level configuration object for storage of a list of views formerly using its styles. When the module is **re-enabled**, it will attempt to restore those displays to Enhanced Table (best effort).
 
 If you plan to uninstall the module permanently, verify affected Views are using the core **Table** style before uninstalling.

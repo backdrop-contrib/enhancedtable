@@ -68,6 +68,28 @@ function enhancedtable_disable() {
   // Persist the list so we can restore on re-enable.
   state_set('enhancedtable.disabled_switched_displays', $switched);
 
+  // Debug message: report what we switched.
+  if (!empty($switched)) {
+    $items = array();
+
+    foreach ($switched as $view_name => $display_ids) {
+      $view_name_safe = check_plain($view_name);
+      $display_ids_safe = array_map('check_plain', (array) $display_ids);
+
+      // Include display IDs so you can confirm exactly what changed.
+      $items[] = $view_name_safe . ' [' . implode(', ', $display_ids_safe) . ']';
+    }
+
+    $list_html = '<ul><li>' . implode('</li><li>', $items) . '</li></ul>';
+
+    backdrop_set_message(t('The following views have been reverted back to stock Views Table display: !list', array(
+      '!list' => $list_html,
+    )), 'status');
+  }
+  else {
+    backdrop_set_message(t('Enhanced Table disable hook ran, but no View displays were found using the Enhanced Table style plugin.'), 'warning');
+  }
+
   if (function_exists('views_invalidate_cache')) {
     views_invalidate_cache();
   }
@@ -88,6 +110,8 @@ function enhancedtable_enable() {
   if (empty($switched) || !is_array($switched)) {
     return;
   }
+  // Debug message: report what we restored.
+  $restored = array();  // Add this near the top of enhancedtable_enable(), before the foreach.
 
   foreach ($switched as $view_name => $display_ids) {
     $view = views_get_view($view_name);
@@ -109,6 +133,7 @@ function enhancedtable_enable() {
         if ($style_plugin === 'table') {
           $display->display_options['style_plugin'] = 'enhancedtable';
           $view_changed = TRUE;
+          $restored[$view_name][] = $display_id;
         }
       }
       elseif (is_array($display) && isset($display['display_options']['style_plugin'])) {
@@ -116,6 +141,7 @@ function enhancedtable_enable() {
         if ($style_plugin === 'table') {
           $display['display_options']['style_plugin'] = 'enhancedtable';
           $view_changed = TRUE;
+          $restored[$view_name][] = $display_id;
         }
       }
     }
@@ -123,6 +149,25 @@ function enhancedtable_enable() {
     if ($view_changed) {
       $view->save();
     }
+  }
+
+  // Debug message: report what we restored.
+  if (!empty($restored)) {
+    $items = array();
+    foreach ($restored as $view_name => $display_ids) {
+      $view_name_safe = check_plain($view_name);
+      $display_ids_safe = array_map('check_plain', (array) $display_ids);
+      $items[] = $view_name_safe . ' [' . implode(', ', $display_ids_safe) . ']';
+    }
+
+    $list_html = '<ul><li>' . implode('</li><li>', $items) . '</li></ul>';
+
+    backdrop_set_message(t('The following views have been restored to Enhanced Table display: !list', array(
+      '!list' => $list_html,
+    )), 'status');
+  }
+  else {
+    backdrop_set_message(t('Enhanced Table enable hook ran, but no View displays were restored.'), 'warning');
   }
 
   // One-shot restore; clear the record after attempting.
