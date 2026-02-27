@@ -47,6 +47,7 @@ All settings are stored per View display, inside the View’s configuration (`di
 
 ## Disabling / uninstalling
 
+NOTE: The following functionality isn't working quite yet... _(we're working on it)_
 Enhanced Table includes a safety mechanism: when the module is **disabled**, it automatically switches any displays using the Enhanced Table style back to the core **Table** style so the View continues to render (albit, with some styling no longer working), and it will create a module-level configuration object for storage of a list of views formerly using its styles. When the module is **re-enabled**, it will attempt to restore those displays to Enhanced Table (best effort).
 
 If you plan to uninstall the module permanently, verify affected Views are using the core **Table** style before uninstalling.
