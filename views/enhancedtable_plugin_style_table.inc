@@ -465,7 +465,7 @@ class enhancedtable_plugin_style_table extends views_plugin_style_table {
     // the stock table matrix, and avoids fatal errors if columns/info/default
     // are absent).
     $form['#theme'] = array('enhancedtable_views_ui_style_plugin_table');
-/*
+   /*
     // Mark this as a EnhancedTable style-options form so we can scope CSS tightly.
     // -This was implemented to eliminate the pesky horizontal scroll bar.
     // -It allows us to clamp the width of the fieldsets.
@@ -473,7 +473,7 @@ class enhancedtable_plugin_style_table extends views_plugin_style_table {
       $form['#attributes']['class'] = array();
     }
     $form['#attributes']['class'][] = 'enhancedtable-style-options-form';
-*/
+   */
     // If the parent didn't build the field matrix, just bail.
     if (empty($this->display) || empty($this->display->handler)) {
       return;
@@ -791,7 +791,7 @@ class enhancedtable_plugin_style_table extends views_plugin_style_table {
           'placeholder' => t('%, px, em, rem'),
         ),
         '#states' => $bt_states_not_merged,
-//        '#description' => t('CSS width (e.g. 8em, 120px, 20%).'),
+       // '#description' => t('CSS width (e.g. 8em, 120px, 20%).'),
       );
 
       // Hide-if-empty.

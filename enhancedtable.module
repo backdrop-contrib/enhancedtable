@@ -76,17 +76,12 @@ function enhancedtable_theme($existing, $type, $theme, $path) {
 function enhancedtable_preprocess_views_view_table(&$variables) {
   $view = $variables['view'];
 
-  // Only act on views using our EnhancedTable style plugin.
-  $plugin_name = !empty($view->style_plugin->plugin_name)
-    ? $view->style_plugin->plugin_name
-    : '';
-    // We're looking for 'enhancedtable' as defined in file:enhancedtable.views.inc
-  if ($plugin_name !== 'enhancedtable') {
-//watchdog('BT79', 'Style plugin: @name', array('@name' => $view->style_plugin->plugin_name), WATCHDOG_DEBUG);
-
+  // Only act on views whose style plugin is an EnhancedTable-derived handler.
+  // This allows other style plugins (e.g. Subbview) to extend EnhancedTable and
+  // still benefit from the same CSS-based enhancements.
+  if (empty($view->style_plugin) || !($view->style_plugin instanceof enhancedtable_plugin_style_table)) {
     return;
   }
-//watchdog('BT83', 'Style plugin: @name', array('@name' => $view->style_plugin->plugin_name), WATCHDOG_DEBUG);
 
   $options = $view->style_plugin->options;
 
@@ -121,9 +116,9 @@ function enhancedtable_preprocess_views_view_table(&$variables) {
       $field_class = backdrop_clean_css_identifier($field);
 
       $selector = $view_selector
-        . ' table.views-table th.views-field-' . $field_class . ', '
+        . ' .view-content > table.views-table th.views-field-' . $field_class . ', '
         . $view_selector
-        . ' table.views-table td.views-field-' . $field_class;
+        . ' .view-content > table.views-table td.views-field-' . $field_class;
 
       $css .= $selector . " { width: {$width}; }\n";
     }
@@ -159,9 +154,9 @@ function enhancedtable_preprocess_views_view_table(&$variables) {
 
       $field_class = backdrop_clean_css_identifier($field);
       $selector = $view_selector
-        . ' table.views-table th.views-field-' . $field_class . ', '
+        . ' .view-content > table.views-table th.views-field-' . $field_class . ', '
         . $view_selector
-        . ' table.views-table td.views-field-' . $field_class;
+        . ' .view-content > table.views-table td.views-field-' . $field_class;
 
       $css .= $selector . " { text-align: {$text_align}; }\n";
     }
@@ -191,7 +186,7 @@ function enhancedtable_preprocess_views_view_table(&$variables) {
     $border = $thk . ' solid ' . $color;
 
     $css .= $view_selector
-      . " table.views-table tbody tr + tr td { border-top: {$border}; }\n";
+      . " .view-content > table.views-table tbody tr + tr td { border-top: {$border}; }\n";
   }
 
   // -------------------------------------------------------------------
@@ -215,9 +210,9 @@ function enhancedtable_preprocess_views_view_table(&$variables) {
     $border = $thk . ' solid ' . $color;
 
     $css .= $view_selector
-      . " table.views-table thead th + th, "
+      . " .view-content > table.views-table thead th + th, "
       . $view_selector
-      . " table.views-table tbody td + td { border-left: {$border}; }\n";
+      . " .view-content > table.views-table tbody td + td { border-left: {$border}; }\n";
   }
 
   // -------------------------------------------------------------------
@@ -241,7 +236,7 @@ function enhancedtable_preprocess_views_view_table(&$variables) {
     $border = $thk . ' solid ' . $color;
 
     $css .= $view_selector
-      . " table.views-table { border: {$border}; border-collapse: collapse; }\n";
+      . " .view-content > table.views-table { border: {$border}; border-collapse: collapse; }\n";
   }
   if ($css !== '') {
     backdrop_add_css($css, array('type' => 'inline'));
