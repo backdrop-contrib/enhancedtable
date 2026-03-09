@@ -767,7 +767,7 @@ class enhancedtable_base_style_table extends views_plugin_style_table {
 
     // ------------------------------------------------------------------
     // Mechanics fieldset:
-    //   - Override normal sorting...
+    //   - Click-sort behavior
     //   - Enable sticky table headers
     //   - Show the empty text in the table
     // ------------------------------------------------------------------
@@ -780,8 +780,33 @@ class enhancedtable_base_style_table extends views_plugin_style_table {
       '#weight'      => 40,
     );
 
-    $mechanics_order = array('override', 'sticky', 'empty_table');
-    $w = 0;
+    $click_sort_behavior = 'preserve_normal_sort';
+    if (!empty($this->options['override'])) {
+      $click_sort_behavior = !empty($this->options['append_original_sort'])
+        ? 'click_sort_then_normal'
+        : 'click_sort_only';
+    }
+
+    $form['bt_mechanics']['click_sort_behavior'] = array(
+      '#type' => 'radios',
+      '#title' => t('When click sorting is used'),
+      '#options' => array(
+        'preserve_normal_sort' => t("Do not override the view's normal sort criteria"),
+        'click_sort_only' => t('Use the clicked column only'),
+        'click_sort_then_normal' => t("Use the clicked column first, then apply the view's normal sort criteria"),
+      ),
+      '#default_value' => $click_sort_behavior,
+      '#parents' => array('style_options', 'click_sort_behavior'),
+      '#weight' => 0,
+      '#description' => t('This replaces the two overlapping click-sort checkboxes from core Views. The third option is useful for stable tie-breaking and pagination when many rows share the same clicked value.'),
+    );
+
+    // Remove the overlapping core widgets; the radios above map back onto the
+    // native Views options during submit.
+    unset($form['override'], $form['append_original_sort']);
+
+    $mechanics_order = array('sticky', 'empty_table');
+    $w = 10;
     foreach ($mechanics_order as $key) {
       if (isset($form[$key])) {
         $form['bt_mechanics'][$key] = $form[$key];
@@ -1121,6 +1146,29 @@ class enhancedtable_base_style_table extends views_plugin_style_table {
             $first_child = TRUE;
           }
         }
+      }
+
+      // Map the consolidated click-sort behavior UI back onto the native
+      // Views table-style options.
+      if (isset($so['click_sort_behavior'])) {
+        switch ($so['click_sort_behavior']) {
+          case 'click_sort_then_normal':
+            $so['override'] = 1;
+            $so['append_original_sort'] = 1;
+            break;
+
+          case 'click_sort_only':
+            $so['override'] = 1;
+            $so['append_original_sort'] = 0;
+            break;
+
+          case 'preserve_normal_sort':
+          default:
+            $so['override'] = 0;
+            $so['append_original_sort'] = 0;
+            break;
+        }
+        unset($so['click_sort_behavior']);
       }
 
       // Click-sorting cleanup.
