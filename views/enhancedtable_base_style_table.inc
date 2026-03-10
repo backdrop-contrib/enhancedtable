@@ -518,34 +518,13 @@ class enhancedtable_base_style_table extends views_plugin_style_table {
     }
 
     // ------------------------------------------------------------------
-    // Column setting help text (appears just under the flipped table).
+    // Shared help fieldset.
     // ------------------------------------------------------------------
-
-    $form['bt_help'] = array(
-      '#type'        => 'fieldset',
-      '#title'       => t('Help'),
-      '#collapsible' => TRUE,
-      '#collapsed'   => TRUE,
-      '#weight'      => 0,
-    );
-
-    // ------------------------------------------------------------------
-    // Set up our help text from an external HTML file.
-    // ------------------------------------------------------------------
-    $help_file = backdrop_get_path('module', 'enhancedtable') . '/help/enhancedtable-settings-help.html';
-    $help_text = '';
-
-    if (file_exists($help_file)) {
-      $help_text = file_get_contents($help_file);
-      // Optional: sanitize if you’re not fully trusting this file.
-      // $help_text = filter_xss_admin($markup);
+    module_load_include('inc', 'enhancedtable', 'views/enhancedtable.admin');
+    if (function_exists('enhancedtable_build_shared_help_form')) {
+      $form['bt_help'] = enhancedtable_build_shared_help_form();
+      $form['bt_help']['#weight'] = 0;
     }
-
-    $form['bt_help']['column_help'] = array(
-      '#type'   => 'markup',
-      '#markup' => $help_text,
-      '#weight' => 0,
-    );
 
     // Set the weight of Grouping.
     if (isset($form['grouping'])) {
