@@ -233,3 +233,116 @@ function theme_enhancedtable_views_ui_style_plugin_table($vars) {
   $output .= backdrop_render_children($form);
   return $output;
 }
+
+/**
+ * Helper: build one collapsible help section.
+ */
+function enhancedtable_build_help_section($title, $markup, $collapsed = TRUE, $weight = 0) {
+  return array(
+    '#type' => 'fieldset',
+    '#title' => $title,
+    '#collapsible' => TRUE,
+    '#collapsed' => $collapsed,
+    '#weight' => $weight,
+    'text' => array(
+      '#type' => 'markup',
+      '#markup' => $markup,
+    ),
+  );
+}
+
+/**
+ * Build shared help UI for EnhancedTable-style settings screens.
+ *
+ * @return array
+ *   A Backdrop Form API render array.
+ */
+function enhancedtable_build_shared_help_form() {
+  $help = array(
+    '#type' => 'fieldset',
+    '#title' => t('Table feature help'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#weight' => 0,
+    '#attributes' => array('class' => array('enhancedtable-help')),
+    '#description' => t('Guidance for column layout, combining fields, sorting, widths, borders, and row classes.'),
+  );
+
+  $help['column_ordering'] = enhancedtable_build_help_section(t('Column ordering'),
+    '<p>' . t('Use the left/right controls to change the order of columns in the rendered table.') . '</p>'
+    . '<p>' . t('This affects display only. It does not change the query order, field order, or data retrieval order defined in the Fields → Rearrange section of the Views UI.') . '</p>', TRUE, 0
+  );
+
+  $help['combining_columns'] = enhancedtable_build_help_section(t('Combining columns'),
+    '<p>' . t('To combine one field into the column to its left, place the field immediately to the right of the destination column and click <em>Merge left</em>.') . '</p>'
+    . '<p>' . t('When a field is merged left:') . '</p>'
+    . '<ul>'
+    . '<li>' . t('its content is displayed in the cell of the column to its left') . '</li>'
+    . '<li>' . t('only the header of the left-hand column is shown') . '</li>'
+    . '<li>' . t('the merged field no longer renders as a separate column') . '</li>'
+    . '</ul>'
+    . '<p>' . t('You may enter separator text to appear between merged values. HTML is allowed in the separator field. For example, use a space, a dash, or <code>&lt;br&gt;</code> to place the second value on a new line.') . '</p>'
+    . '<p>' . t('Select <em>Inline title</em> to prepend the field label to its rendered value inside the table cell.') . '</p>'
+    . '<p><strong>' . t('Notes:') . '</strong></p>'
+    . '<ul>'
+    . '<li>' . t('A field can only be merged into the column immediately to its left.') . '</li>'
+    . '<li>' . t('If several adjacent fields are merged left, they will all render in the same destination column, in display order.') . '</li>'
+    . '</ul>', TRUE, 10
+  );
+
+  $help['alignment'] = enhancedtable_build_help_section(t('Alignment'),
+    '<p>' . t('Sets the horizontal alignment of both the column header and the cell contents for that column.') . '</p>'
+    . '<p>' . t('This affects rendered table output only.') . '</p>', TRUE, 20
+  );
+
+  $help['width'] = enhancedtable_build_help_section(t('Width'),
+    '<p>' . t('Specify a preferred width for each column. The browser will honor the width when possible.') . '</p>'
+    . '<p>' . t('Supported units include: px, em, rem, %, ch, ex.') . '</p>'
+    . '<p><strong>' . t('Notes:') . '</strong></p>'
+    . '<ul>'
+    . '<li>' . t('Column width in HTML tables is advisory, not absolute.') . '</li>'
+    . '<li>' . t('On narrow screens or crowded tables, the browser may reduce a column below the specified width in order to fit the table.') . '</li>'
+    . '<li>' . t('Width settings apply to the rendered column. If several fields are merged into one column, the width applies to the destination column.') . '</li>'
+    . '</ul>', TRUE, 30
+  );
+
+  $help['click_sorting'] = enhancedtable_build_help_section(t('Click sorting'),
+    '<p>' . t('For sortable fields, you may enable click sorting and choose the sort direction used on the first click.') . '</p>'
+    . '<p>' . t('You may also choose a default click-sort column for the initial table display, or select <em>No default</em> to leave the table without a default click-sort column on first load.') . '</p>'
+    . '<p><strong>' . t('Notes:') . '</strong></p>'
+    . '<ul>'
+    . '<li>' . t('Click sorting affects the order of rows in the rendered view.') . '</li>'
+    . '<li>' . t('If normal Views sort criteria are also present, the selected click-sort behavior determines whether those criteria are ignored or appended as tie-breakers.') . '</li>'
+    . '<li>' . t('Click sorting is available only for fields that support sorting in Views.') . '</li>'
+    . '</ul>', TRUE, 40
+  );
+
+  $help['hide_if_empty'] = enhancedtable_build_help_section(t('Hide if empty'),
+    '<p>' . t('Hide this column when the view returns no data for this field.') . '</p>'
+    . '<p>' . t('This is most useful when a field is optional and would otherwise produce an empty column across the result set.') . '</p>', TRUE, 50
+  );
+
+  $help['borders'] = enhancedtable_build_help_section(t('Borders'),
+    '<p>' . t('Specify border thickness for table frame, rows, and columns.') . '</p>'
+    . '<p>' . t('Supported units include: px, em, rem, ch, ex.') . '</p>'
+    . '<p><strong>' . t('Notes:') . '</strong></p>'
+    . '<ul>'
+    . '<li>' . t('Border settings apply to the rendered table only.') . '</li>'
+    . '<li>' . t('The visible result may vary somewhat depending on browser table layout behavior and theme CSS.') . '</li>'
+    . '</ul>', TRUE, 60
+  );
+
+  $help['add_views_row_classes'] = enhancedtable_build_help_section(t('Add Views row classes'),
+    '<p>' . t('Adds the default Views row classes, such as <code>views-row</code>, <code>views-row-1</code>, <code>views-row-first</code>, <code>views-row-last</code>, <code>odd</code>, and <code>even</code>.') . '</p>'
+    . '<p>' . t('Disable this to reduce markup output.') . '</p>'
+    . '<p><strong>' . t('Note:') . '</strong> ' . t('Your theme or custom CSS may rely on these classes. If you disable them, check the rendered result carefully.') . '</p>', TRUE, 70
+  );
+
+  $help['row_class'] = enhancedtable_build_help_section(t('Row class'),
+    '<p>' . t('A CSS class to add to each table row.') . '</p>'
+    . '<p>' . t('Use this to target the rows of this view with custom CSS.') . '</p>', TRUE, 80
+  );
+
+  return $help;
+}
+
